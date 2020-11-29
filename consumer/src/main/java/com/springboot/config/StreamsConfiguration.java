@@ -8,6 +8,7 @@ import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
+import org.apache.kafka.streams.errors.LogAndContinueExceptionHandler;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KTable;
@@ -40,6 +41,8 @@ public class StreamsConfiguration {
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.Long().getClass().getName());
+//        props.put(StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG, LogAndContinueExceptionHandler.class);
+//        props.put(StreamsConfig.DEFAULT_PRODUCTION_EXCEPTION_HANDLER_CLASS_CONFIG, LogAndContinueExceptionHandler.class);
         return new KafkaStreamsConfiguration(props);
     }
 
@@ -62,13 +65,16 @@ public class StreamsConfiguration {
                    timestamp = 1554215083998;
                 }
         */
-		KStream<String, Long> gain = input.mapValues(v -> {
-			long val = Math.round(v.getAge() + v.getAge());
-			return val;
-		});
+//		KStream<String, Long> gain = input.mapValues(v -> {
+//			long val = Math.round(v.getAge() + v.getAge());
+//			return val;
+//		});
+//		KStream<String, Long> gain = input.mapValues()
         /*  Key: "Germany-Belgium:H"
             Value: 170L
         */
+
+		KStream<String, Long> gain = input.groupByKey().count().toStream();
 
 
 
@@ -82,6 +88,36 @@ public class StreamsConfiguration {
 
 		return topology;
 	}
+
+//	@Bean
+//	StreamsBuilderFactoryBeanConfigurer uncaughtExceptionConfigurer(
+//					@Qualifier(KafkaStreamsDefaultConfiguration.DEFAULT_STREAMS_BUILDER_BEAN_NAME) StreamsBuilderFactoryBean factoryBean,
+//					ApplicationContext ctx) {
+//		return new StreamsBuilderFactoryBeanConfigurer(factoryBean, ctx);
+//	}
+//
+//	@AllArgsConstructor
+//	static class StreamsBuilderFactoryBeanConfigurer implements InitializingBean {
+//		private final StreamsBuilderFactoryBean factoryBean;
+//		private final ApplicationContext ctx;
+//
+//		@Override
+//		public void afterPropertiesSet() {
+//
+//			this.factoryBean.setUncaughtExceptionHandler(
+//							(t, e) -> {
+//								log.error("Uncaught exception in thread {}", t.getName(), e);
+//								factoryBean.getKafkaStreams().close(Duration.ofSeconds(10));
+//								log.info("Kafka streams closed.");
+//							});
+//			this.factoryBean.setStateListener((newState, oldState) -> {
+//				if (newState == KafkaStreams.State.NOT_RUNNING) {
+//					log.info("Now exiting the application.");
+//					SpringApplication.exit(ctx, () -> 1);
+//				}
+//			});
+//		}
+//	}
 
 //	@Bean
 //	public KStream<String, String> kStreamJson(StreamsBuilder builder) {

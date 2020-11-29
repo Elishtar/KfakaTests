@@ -2,6 +2,8 @@ package com.springboot.config;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +19,9 @@ public class KafkaProducerConfig {
 
 	@Value("${kafka.boot.server}")
 	private String kafkaServer;
+
+	@Value("${kafka.topic.name}")
+	private String topicName;
 
 	@Bean
 	public KafkaTemplate<String, String> kafkaTemplate() {
@@ -34,4 +39,10 @@ public class KafkaProducerConfig {
 		//config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
 		return new DefaultKafkaProducerFactory<>(config);
 	}
+
+//	@Bean
+//	public NewTopic betTopic() {
+//		return new NewTopic(topicName, 10, (short) 1);
+//	}
+
 }
