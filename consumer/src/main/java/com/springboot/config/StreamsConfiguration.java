@@ -74,12 +74,19 @@ public class StreamsConfiguration {
             Value: 170L
         */
 
-		KStream<String, Long> gain = input.groupByKey().count().toStream();
+
+		KStream<String, Long> gain = input.map((key, student) -> KeyValue.pair(key + "_" +student.getAge(), student))
+						.groupByKey()
+						.count()
+						.toStream();
 
 
 
-		gain.to("myTopic-kafkasender-out", Produced.with(Serdes.String(),
+		gain.filter((key, count) -> count > Integer.parseInt(key.split("_")[1]))
+						.to("myTopic-kafkasender-out", Produced.with(Serdes.String(),
 						new JsonSerde<>(Long.class)));
+
+
 		Topology topology = streamsBuilder.build();
 
 		System.out.println("===============================");
